@@ -1,7 +1,5 @@
 const functions = require("firebase-functions");
 const { Nuxt } = require("nuxt");
-const express = require("express");
-const app = express();
 
 const config = {
   dev: false,
@@ -10,19 +8,20 @@ const config = {
     publicPath: "/assets/"
   }
 };
+
 const nuxt = new Nuxt(config);
 
-function handleRequest(req, res) {
-  console.log("log3");
-  res.set("Cache-Control", "public, max-age=300, s-maxage=600");
-  return new Promise((resolve, reject) => {
-    nuxt.render(req, res, promise => {
-      promise.then(resolve).catch(reject);
-    });
-  });
+let isReady = false;
+
+async function handleRequest(req, res) {
+  if (!isReady) {
+    try {
+      isReady = await nuxt.ready();
+    } catch (error) {
+      process.exit(1);
+    }
+  }
+  await nuxt.render(req, res);
 }
 
-
-app.use(handleRequest);
-
-exports.nuxtssr = functions.https.onRequest(app);
+exports.nuxtssr = functions.https.onRequest(handleRequest);
