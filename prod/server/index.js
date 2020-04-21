@@ -25,6 +25,4 @@ function handleRequest(req, res) {
 
 app.use(handleRequest);
 
-const server = require("./server")
 exports.nuxtssr = functions.https.onRequest(app);
-exports.server = functions.https.onRequest(server)
